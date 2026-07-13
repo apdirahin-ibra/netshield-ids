@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: netshield-ids-api
+    runtime: python
+    plan: free
+    buildCommand: pip install -r backend/requirements.txt
+    startCommand: uvicorn app.main:app --app-dir backend --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: CORS_ORIGINS
+        sync: false
+      - key: NETSHIELD_DEMO_MODE
+        value: "true"
+      - key: NETSHIELD_CAPTURE_ENABLED
+        value: "false"

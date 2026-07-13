@@ -1,0 +1,9 @@
+import { Eye, ShieldCheck } from "lucide-react";
+import { formatConfidence, formatDateTime } from "../utils/formatters";
+import EmptyState from "./common/EmptyState";
+import StatusBadge from "./common/StatusBadge";
+
+export default function AlertsTable({ alerts = [], loading = false, reviewed = [], onReview, onView, limit }) {
+  const rows = limit ? alerts.slice(0, limit) : alerts;
+  return <section className="data-panel"><div className="panel-heading"><div><h2>Security alerts</h2><p>High-confidence detections requiring review</p></div></div>{loading ? <div className="table-skeleton"><i /><i /><i /></div> : rows.length ? <div className="table-scroll"><table><thead><tr><th>ID</th><th>Alert type</th><th>Severity</th><th>Source</th><th>Destination</th><th>Confidence</th><th>Time</th><th>Status</th><th>Action</th></tr></thead><tbody>{rows.map((item) => { const isReviewed = reviewed.includes(item.id); return <tr key={item.id}><td className="mono muted">#{item.id}</td><td><strong>{item.alert_type}</strong></td><td><StatusBadge tone={item.severity === "HIGH" ? "danger" : item.severity === "MEDIUM" ? "warning" : "info"}>{item.severity}</StatusBadge></td><td className="mono">{item.source}</td><td className="mono">{item.destination}</td><td>{formatConfidence(item.confidence)}</td><td className="muted">{formatDateTime(item.created_at || item.timestamp)}</td><td><StatusBadge tone={isReviewed ? "success" : "warning"}>{isReviewed ? "Reviewed" : "Open"}</StatusBadge></td><td><div className="row-actions">{onView && <button className="icon-button" onClick={() => onView(item)} aria-label="View alert"><Eye size={16} /></button>}{onReview && !isReviewed && <button className="icon-button" onClick={() => onReview(item.id)} aria-label="Mark reviewed"><ShieldCheck size={16} /></button>}</div></td></tr>; })}</tbody></table></div> : <EmptyState title="No security alerts" message="No high-confidence attacks are currently stored." />}</section>;
+}

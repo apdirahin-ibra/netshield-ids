@@ -1,0 +1,26 @@
+__pycache__/
+*.py[cod]
+venv/
+.env
+.env.*
+!.env.example
+node_modules/
+dist/
+.vercel/
+.render/
+backend/data/*.db
+*.log
+
+# Training inputs and generated output are not part of the demo deployment.
+dataset/*
+!dataset/.gitkeep
+!dataset/sample.csv
+output/
+tmp/
+
+# The deployed API only loads these four model artifacts.
+backend/model/*.pkl
+!backend/model/best_model.pkl
+!backend/model/random_forest.pkl
+!backend/model/scaler.pkl
+!backend/model/selected_features.pkl

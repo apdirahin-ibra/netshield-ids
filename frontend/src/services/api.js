@@ -1,0 +1,39 @@
+import axios from "axios";
+import { authService } from "./authService";
+
+export const API_BASE_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
+
+const api = axios.create({ baseURL: API_BASE_URL, timeout: 12000 });
+
+api.interceptors.request.use((config) => {
+  const token = authService.getSession()?.access_token;
+  if (token) config.headers.Authorization = `Bearer ${token}`;
+  return config;
+});
+
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) window.dispatchEvent(new Event("netshield:auth:expired"));
+    if (error.response?.status === 403) window.dispatchEvent(new Event("netshield:auth:forbidden"));
+    return Promise.reject(error);
+  },
+);
+
+export const getBackendHealth = async () => (await api.get("/")).data;
+export const getLivePredictions = async (limit = 50) => (await api.get(`/api/monitor/live?limit=${limit}`)).data;
+export const getStats = async () => (await api.get("/api/monitor/stats")).data;
+export const getAlerts = async (limit = 50) => (await api.get(`/api/alerts/?limit=${limit}`)).data;
+export const getModelInfo = async () => (await api.get("/api/model-info/")).data;
+export const startCapture = async (networkInterface = "") => (await api.post(`/api/capture/start${networkInterface ? `?interface=${encodeURIComponent(networkInterface)}` : ""}`)).data;
+export const stopCapture = async () => (await api.post("/api/capture/stop")).data;
+export const getCaptureStatus = async () => (await api.get("/api/capture/status")).data;
+export const clearDashboardData = async () => (await api.delete("/api/monitor/clear")).data;
+export const replayBenign = async (count = 10) => (await api.post(`/api/replay/benign?count=${count}`)).data;
+export const replayDdos = async (count = 10) => (await api.post(`/api/replay/ddos?count=${count}`)).data;
+export const replayMixed = async (benignCount = 10, ddosCount = 10) => (await api.post(`/api/replay/mixed?benign_count=${benignCount}&ddos_count=${ddosCount}`)).data;
+export const predictManualFlow = async (features) => (await api.post("/api/predict/flow", features)).data;
+export const getRandomDatasetSample = async (trafficType = "MIXED") => (await api.get(`/api/replay/random-sample?traffic_type=${trafficType}`)).data;
+export const getReportSummary = async () => (await api.get("/api/reports/summary")).data;
+
+export default api;
