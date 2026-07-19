@@ -1,18 +1,31 @@
 import { ArrowRight, CheckCircle2, ChevronRight, Network, Shield, Sparkles } from "lucide-react";
 import { Link } from "react-router-dom";
-import { Bar, BarChart, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { Bar, BarChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { capabilityCards, landingProcess } from "../../data/projectData";
 
 export default function LandingPage() {
-  const traffic = [{ name: "BENIGN", value: 627636 }, { name: "DDoS", value: 128027 }];
   return <div className="landing-page">
     <nav className="landing-nav"><Link className="landing-brand" to="/"><span><Shield size={21} /></span><div><strong>NetShield IDS</strong><small>Threat Detection Platform</small></div></Link><div><a href="#capabilities">Capabilities</a><a href="#architecture">Architecture</a><Link className="button button-ghost" to="/login">Sign in</Link><Link className="button button-primary" to="/login">Launch NetShield <ArrowRight size={16} /></Link></div></nav>
     <main>
       <section className="hero-section">
         <div className="hero-copy"><span className="hero-kicker"><Sparkles size={15} />Machine learning-powered network defense</span><h1>Detect network threats <em>before they disrupt</em> your systems.</h1><p>NetShield IDS monitors network traffic, detects DDoS attacks, explains predictions, and delivers real-time security alerts from one focused workspace.</p><div className="hero-actions"><Link className="button button-primary button-lg" to="/login">Launch NetShield <ArrowRight size={17} /></Link><a className="button button-ghost button-lg" href="#capabilities">View system capabilities</a></div><div className="hero-trust"><span><CheckCircle2 size={16} />12 selected flow features</span><span><CheckCircle2 size={16} />Explainable results</span><span><CheckCircle2 size={16} />Role-based access</span></div></div>
-        <div className="hero-visual" aria-label="NetShield security dashboard preview">
-          <div className="preview-chrome"><span /><span /><span /><small>Security Operations / Live</small></div>
-          <div className="preview-body"><aside><Shield size={19} /><i /><i /><i /><i /></aside><div className="preview-main"><div className="preview-head"><div><small>NETWORK POSTURE</small><strong>Threat activity is contained</strong></div><span><i />Live capture</span></div><div className="preview-metrics"><article><small>Total flows</small><strong>755,663</strong><em>Analyzed</em></article><article><small>DDoS traffic</small><strong>128,027</strong><em>Detected</em></article><article><small>Model confidence</small><strong>99.9%</strong><em>Random Forest</em></article></div><div className="preview-grid"><div className="preview-chart"><small>Traffic classification</small><ResponsiveContainer width="100%" height={150}><PieChart><Pie data={traffic} dataKey="value" innerRadius={44} outerRadius={64} paddingAngle={4}>{traffic.map((_, index) => <Cell key={index} fill={index ? "#ef5b68" : "#22c997"} />)}</Pie></PieChart></ResponsiveContainer></div><div className="preview-bars"><small>Detection activity</small><ResponsiveContainer width="100%" height={150}><BarChart data={[{ v: 22 }, { v: 36 }, { v: 28 }, { v: 52 }, { v: 40 }, { v: 68 }, { v: 49 }]}><Bar dataKey="v" fill="#7667f5" radius={[4, 4, 0, 0]} /></BarChart></ResponsiveContainer></div></div></div></div>
+        <div className="hero-visual hero-photo" aria-label="Cybersecurity network monitoring visualization">
+          <figure className="hero-photo-frame">
+            <img src="/hero-cybersecurity.jpg" alt="Illuminated digital circuit and cybersecurity interface" />
+            <div className="hero-photo-copy">
+              <span><i />Network defense active</span>
+              <strong>See the signal.<br />Stop the threat.</strong>
+              <small>Machine-learning detection across every analyzed flow.</small>
+            </div>
+            <a
+              className="hero-photo-credit"
+              href="https://unsplash.com/photos/turned-on-black-and-grey-laptop-computer-iIJrUoeRoCQ"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Photo: Philipp Katzenberger / Unsplash
+            </a>
+          </figure>
           <div className="floating-alert"><span><Shield size={17} /></span><div><small>High-confidence detection</small><strong>DDoS flow contained</strong></div></div>
         </div>
       </section>
