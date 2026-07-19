@@ -4,7 +4,7 @@ This setup deploys the React/Vite dashboard to Vercel and the FastAPI API to a f
 
 ## Demo boundaries
 
-- Authentication and roles are frontend demonstrations, not backend security controls.
+- Authentication, roles, and user management are enforced by the backend with hashed passwords and revocable sessions.
 - Live packet capture is disabled on Render. Use the BENIGN and DDoS replay controls.
 - The API is public. Do not use real traffic, credentials, private datasets, or sensitive network information.
 - Render's free filesystem is ephemeral, so predictions and alerts reset after restarts or redeployments.
@@ -50,8 +50,10 @@ Creating the frontend first reserves its final origin for Render's CORS setting.
 1. In Render, select **New > Blueprint** and connect the same GitHub repository.
 2. Render reads `render.yaml` and creates `netshield-ids-api`.
 3. When prompted for `CORS_ORIGINS`, enter the exact Vercel production origin with no trailing slash.
-4. Wait for the health check to pass.
-5. Open `https://YOUR_RENDER_SERVICE.onrender.com/health` and confirm the response reports `status: online`, `mode: demo`, and `live_capture_enabled: false`.
+4. Set strong, unique values for `NETSHIELD_ADMIN_PASSWORD` and `NETSHIELD_ANALYST_PASSWORD`.
+5. Save those initial credentials securely. They are used only when the user database is first created.
+6. Wait for the health check to pass.
+7. Open `https://YOUR_RENDER_SERVICE.onrender.com/health` and confirm the response reports `status: online`, `mode: demo`, and `live_capture_enabled: false`.
 
 The Blueprint deliberately installs `backend/requirements.txt`; do not replace it with the unrelated root requirements file.
 
@@ -67,7 +69,7 @@ The Blueprint deliberately installs `backend/requirements.txt`; do not replace i
 ## 5. Verify the demo
 
 1. Open the Vercel production URL.
-2. Sign in with `admin@netshield.local` and `Admin123!`.
+2. Sign in with `admin@netshield.local` and the `NETSHIELD_ADMIN_PASSWORD` configured in Render.
 3. Confirm the header shows **Backend online**.
 4. Confirm **Start capture** is disabled and the page identifies itself as a replay demo.
 5. Run **Replay BENIGN** and **Replay DDoS** and confirm the dashboard, predictions, and alerts update.
@@ -77,4 +79,4 @@ If the browser reports a CORS error, update `CORS_ORIGINS` in Render to the exac
 
 ## Optional persistence later
 
-For a longer-lived demo, upgrade the Render service, attach a persistent disk, and set `NETSHIELD_DATA_DIR` to the disk mount path. A production IDS also needs real backend authentication and a separate sensor running inside the network being monitored.
+For a longer-lived demo, upgrade the Render service, attach a persistent disk, and set `NETSHIELD_DATA_DIR` to the disk mount path. Without a persistent disk, users, sessions, manual prediction history, predictions, and alerts reset when Render replaces the service instance. A production IDS also needs a separate sensor running inside the network being monitored.

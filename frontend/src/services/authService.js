@@ -1,35 +1,85 @@
+import axios from "axios";
+import { API_BASE_URL } from "./apiConfig";
+
 const STORAGE_KEY = "netshield.auth";
 const SESSION_KEY = "netshield.auth.session";
+const authApi = axios.create({ baseURL: API_BASE_URL, timeout: 60000 });
 
-const USERS = [
-  { id: 1, name: "System Administrator", email: "admin@netshield.local", password: "Admin123!", role: "ADMIN", status: "Active" },
-  { id: 2, name: "Security Analyst", email: "analyst@netshield.local", password: "Analyst123!", role: "SECURITY_ANALYST", status: "Active" },
-];
+function clearStoredSession() {
+  localStorage.removeItem(STORAGE_KEY);
+  sessionStorage.removeItem(SESSION_KEY);
+}
 
-const publicUser = ({ password: _password, ...user }) => user;
+function getStoredSessionEntry() {
+  const persistent = localStorage.getItem(STORAGE_KEY);
+  if (persistent) return { value: persistent, persistent: true };
+  const temporary = sessionStorage.getItem(SESSION_KEY);
+  return temporary ? { value: temporary, persistent: false } : null;
+}
+
+function storeSession(session, persistent) {
+  clearStoredSession();
+  (persistent ? localStorage : sessionStorage).setItem(
+    persistent ? STORAGE_KEY : SESSION_KEY,
+    JSON.stringify(session),
+  );
+}
+
+function errorMessage(error, fallback) {
+  return error.response?.data?.detail || fallback;
+}
 
 export const authService = {
   async login(email, password, remember = false) {
-    await new Promise((resolve) => setTimeout(resolve, 550));
-    const match = USERS.find((user) => user.email.toLowerCase() === email.trim().toLowerCase() && user.password === password);
-    if (!match) throw new Error("Invalid email or password.");
-    const session = {
-      access_token: `mock-${match.role.toLowerCase()}-${Date.now()}`,
-      token_type: "bearer",
-      user: publicUser(match),
-      created_at: new Date().toISOString(),
-    };
-    (remember ? localStorage : sessionStorage).setItem(remember ? STORAGE_KEY : SESSION_KEY, JSON.stringify(session));
-    return session;
+    try {
+      const { data } = await authApi.post("/api/auth/login", {
+        email: email.trim(),
+        password,
+        remember,
+      });
+      storeSession(data, remember);
+      return data;
+    } catch (error) {
+      throw new Error(errorMessage(error, "Unable to sign in. Confirm the backend is online."));
+    }
   },
   async logout() {
-    localStorage.removeItem(STORAGE_KEY);
-    sessionStorage.removeItem(SESSION_KEY);
+    const session = this.getSession();
+    try {
+      if (session?.access_token) {
+        await authApi.post(
+          "/api/auth/logout",
+          {},
+          { headers: { Authorization: `Bearer ${session.access_token}` } },
+        );
+      }
+    } finally {
+      clearStoredSession();
+    }
   },
   getSession() {
+    const entry = getStoredSessionEntry();
+    if (!entry) return null;
     try {
-      return JSON.parse(localStorage.getItem(STORAGE_KEY) || sessionStorage.getItem(SESSION_KEY) || "null");
+      return JSON.parse(entry.value);
     } catch {
+      clearStoredSession();
+      return null;
+    }
+  },
+  async validateSession() {
+    const entry = getStoredSessionEntry();
+    if (!entry) return null;
+    try {
+      const session = JSON.parse(entry.value);
+      const { data } = await authApi.get("/api/auth/me", {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      });
+      const refreshed = { ...session, user: data.user };
+      storeSession(refreshed, entry.persistent);
+      return refreshed;
+    } catch {
+      clearStoredSession();
       return null;
     }
   },

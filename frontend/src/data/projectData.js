@@ -1,5 +1,5 @@
 import {
-  BarChart3, BellRing, BrainCircuit, Database, FileSearch,
+  BarChart3, BellRing, BrainCircuit, Database, FileClock, FileSearch,
   LayoutDashboard, Radio, ShieldCheck, User, Users,
 } from "lucide-react";
 
@@ -8,6 +8,7 @@ export const navigationGroups = [
   { label: "Detection", items: [
     { label: "Live Capture", path: "/live-capture", icon: Radio, permission: "capture:start" },
     { label: "Manual Prediction", path: "/manual-prediction", icon: FileSearch, permission: "prediction:create" },
+    { label: "Prediction History", path: "/prediction-history", icon: FileClock, permission: "prediction:history" },
   ] },
   { label: "Intelligence", items: [
     { label: "Models", path: "/models", icon: BrainCircuit, permission: "models:view" },
@@ -24,6 +25,7 @@ export const pageMeta = {
   "/dashboard": ["Security Overview", "Live detection posture and network activity"],
   "/live-capture": ["Live Capture", "Capture packets, build flows, and classify traffic"],
   "/manual-prediction": ["Manual Prediction", "Inspect a network flow with the deployed model"],
+  "/prediction-history": ["Prediction History", "Review saved manual classifications and feature values"],
   "/models": ["Model Intelligence", "Compare the six evaluated detection models"],
   "/dataset-overview": ["Dataset Overview", "CIC-IDS2017 lineage, classes, and selected features"],
   "/alerts-logs": ["Alerts & Logs", "Investigate detections and prediction activity"],
@@ -66,12 +68,6 @@ export const sampleFlows = [
   { label: "BENIGN", source: "Monday-WorkingHours.pcap_ISCX.csv", features: { "Flow Duration": 115743288, "Total Fwd Packets": 24, "Total Backward Packets": 21, "Total Length of Fwd Packets": 908, "Total Length of Bwd Packets": 6312, "Flow Bytes/s": 62.37942713, "Flow Packets/s": .388791443, "Packet Length Mean": 156.9565217, "SYN Flag Count": 0, "ACK Flag Count": 0, "PSH Flag Count": 1, "Average Packet Size": 160.4444444 } },
   { label: "DDoS", source: "Friday-WorkingHours-Afternoon-DDos.pcap_ISCX.csv", features: { "Flow Duration": 1014742, "Total Fwd Packets": 3, "Total Backward Packets": 5, "Total Length of Fwd Packets": 26, "Total Length of Bwd Packets": 11607, "Flow Bytes/s": 11463.99775, "Flow Packets/s": 7.883777354, "Packet Length Mean": 1292.555556, "SYN Flag Count": 0, "ACK Flag Count": 0, "PSH Flag Count": 1, "Average Packet Size": 1454.125 } },
   { label: "DDoS", source: "Friday-WorkingHours-Afternoon-DDos.pcap_ISCX.csv", features: { "Flow Duration": 17511, "Total Fwd Packets": 3, "Total Backward Packets": 4, "Total Length of Fwd Packets": 26, "Total Length of Bwd Packets": 11601, "Flow Bytes/s": 663982.6395, "Flow Packets/s": 399.7487294, "Packet Length Mean": 1453.375, "SYN Flag Count": 0, "ACK Flag Count": 0, "PSH Flag Count": 1, "Average Packet Size": 1661 } },
-];
-
-export const mockUsers = [
-  { id: 1, name: "System Administrator", email: "admin@netshield.local", role: "ADMIN", status: "Active", lastLogin: "Current session", created: "Jul 01, 2026" },
-  { id: 2, name: "Security Analyst", email: "analyst@netshield.local", role: "SECURITY_ANALYST", status: "Active", lastLogin: "Jul 10, 2026", created: "Jul 01, 2026" },
-  { id: 3, name: "SOC Review Account", email: "reviewer@netshield.local", role: "SECURITY_ANALYST", status: "Disabled", lastLogin: "Never", created: "Jul 04, 2026" },
 ];
 
 export const capabilityCards = [

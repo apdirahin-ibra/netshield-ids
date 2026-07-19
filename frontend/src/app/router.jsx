@@ -16,6 +16,7 @@ const DashboardPage = lazy(() => import("../pages/shared/DashboardPage"));
 const DatasetOverviewPage = lazy(() => import("../pages/shared/DatasetOverviewPage"));
 const LiveCapturePage = lazy(() => import("../pages/shared/LiveCapturePage"));
 const ManualPredictionPage = lazy(() => import("../pages/shared/ManualPredictionPage"));
+const PredictionHistoryPage = lazy(() => import("../pages/shared/PredictionHistoryPage"));
 const ModelsPage = lazy(() => import("../pages/shared/ModelsPage"));
 const ProfilePage = lazy(() => import("../pages/shared/ProfilePage"));
 
@@ -29,6 +30,7 @@ export default function AppRouter() {
       <Route path="/dashboard" element={<DashboardPage />} />
       <Route path="/live-capture" element={<LiveCapturePage />} />
       <Route path="/manual-prediction" element={<ManualPredictionPage />} />
+      <Route path="/prediction-history" element={<PredictionHistoryPage />} />
       <Route path="/models" element={<ModelsPage />} />
       <Route path="/dataset-overview" element={<DatasetOverviewPage />} />
       <Route path="/alerts-logs" element={<AlertsLogsPage />} />

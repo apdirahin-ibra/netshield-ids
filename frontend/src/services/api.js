@@ -1,9 +1,10 @@
 import axios from "axios";
 import { authService } from "./authService";
+import { API_BASE_URL } from "./apiConfig";
 
-export const API_BASE_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
+export { API_BASE_URL };
 
-const api = axios.create({ baseURL: API_BASE_URL, timeout: 12000 });
+const api = axios.create({ baseURL: API_BASE_URL, timeout: 60000 });
 
 api.interceptors.request.use((config) => {
   const token = authService.getSession()?.access_token;
@@ -33,7 +34,13 @@ export const replayBenign = async (count = 10) => (await api.post(`/api/replay/b
 export const replayDdos = async (count = 10) => (await api.post(`/api/replay/ddos?count=${count}`)).data;
 export const replayMixed = async (benignCount = 10, ddosCount = 10) => (await api.post(`/api/replay/mixed?benign_count=${benignCount}&ddos_count=${ddosCount}`)).data;
 export const predictManualFlow = async (features) => (await api.post("/api/predict/flow", features)).data;
+export const getManualPredictionHistory = async (limit = 200) => (await api.get(`/api/predict/history?limit=${limit}`)).data;
 export const getRandomDatasetSample = async (trafficType = "MIXED") => (await api.get(`/api/replay/random-sample?traffic_type=${trafficType}`)).data;
 export const getReportSummary = async () => (await api.get("/api/reports/summary")).data;
+export const getUsers = async () => (await api.get("/api/users")).data;
+export const createUser = async (payload) => (await api.post("/api/users", payload)).data;
+export const updateUser = async (userId, payload) => (await api.put(`/api/users/${userId}`, payload)).data;
+export const deleteUser = async (userId) => (await api.delete(`/api/users/${userId}`)).data;
+export const changePassword = async (payload) => (await api.post("/api/auth/password", payload)).data;
 
 export default api;

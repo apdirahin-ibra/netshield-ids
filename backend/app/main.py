@@ -4,12 +4,14 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.config import DEMO_MODE, LIVE_CAPTURE_ENABLED, get_cors_origins
 from app.db.database import init_db
 from app.routes.alerts import router as alerts_router
+from app.routes.auth import router as auth_router
 from app.routes.capture import router as capture_router
 from app.routes.model import router as model_router
 from app.routes.monitor import router as monitor_router
 from app.routes.predict import router as predict_router
 from app.routes.replay import router as replay_router
 from app.routes.reports import router as reports_router
+from app.routes.users import router as users_router
 
 
 app = FastAPI(
@@ -49,6 +51,8 @@ def health():
 
 
 app.include_router(monitor_router)
+app.include_router(auth_router)
+app.include_router(users_router)
 app.include_router(alerts_router)
 app.include_router(reports_router)
 app.include_router(model_router)

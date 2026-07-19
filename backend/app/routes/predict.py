@@ -1,7 +1,9 @@
 from typing import Any, Dict
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends, Query
 
+from app.auth import get_current_user
+from app.db.database import get_manual_prediction_history, save_manual_prediction
 from app.services.predictor import get_predictor
 
 
@@ -94,7 +96,7 @@ def generate_reason(features: Dict[str, Any], prediction_label: str) -> str:
 
 
 @router.post("/flow")
-def predict_flow(features: Dict[str, Any]):
+def predict_flow(features: Dict[str, Any], current_user=Depends(get_current_user)):
     """
     Manual prediction endpoint.
     Receives the 12 selected features and returns BENIGN or DDoS.
@@ -103,11 +105,24 @@ def predict_flow(features: Dict[str, Any]):
     result = predictor.predict(features)
     prediction_label = result["label"]
 
-    return {
+    response = {
         "status": "Attack Detected" if prediction_label == "DDoS" else "Normal Traffic",
         "prediction": prediction_label,
         "confidence": result["confidence"],
         "reason": generate_reason(result["features"], prediction_label),
         "class_id": result["prediction"],
         "features_used": result["features"],
+    }
+    response["history_id"] = save_manual_prediction(current_user, response)
+    return response
+
+
+@router.get("/history")
+def prediction_history(
+    limit: int = Query(default=200, ge=1, le=500),
+    _current_user=Depends(get_current_user),
+):
+    return {
+        "status": "success",
+        "data": get_manual_prediction_history(limit),
     }
