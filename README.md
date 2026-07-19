@@ -1,107 +1,138 @@
+<div align="center">
+
 # NetShield IDS
 
-Network Intrusion Detection System with ML-based flow classification, real-time monitoring, alerts, and a React dashboard.
+**Machine-learning network intrusion detection with live monitoring, explainable predictions, alerts, and protected administration.**
 
-## Project structure
+[![Python](https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white)](https://www.python.org/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.125-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
+[![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=0B1220)](https://react.dev/)
+[![Vite](https://img.shields.io/badge/Vite-6-646CFF?logo=vite&logoColor=white)](https://vite.dev/)
 
-```
+<img src="docs/images/netshield-cybersecurity.jpg" alt="Cybersecurity system visualization" width="100%" />
+
+</div>
+
+NetShield IDS classifies network-flow activity as **BENIGN** or **DDoS** using a deployed Random Forest model trained around CIC-IDS2017 features. It combines a FastAPI and SQLite backend with a responsive React operations dashboard.
+
+## Highlights
+
+- Live packet capture for supported local environments
+- Safe BENIGN and DDoS traffic replay for cloud demonstrations
+- Random Forest inference using 12 selected network-flow features
+- Explainable manual predictions with persistent history
+- Security alerts, traffic logs, metrics, and CSV export
+- Backend-enforced roles, hashed passwords, and revocable sessions
+- Persistent administrator user management
+- Vercel frontend and Render backend deployment configuration
+
+## Architecture
+
+```text
 netshield-ids/
-├── backend/          # FastAPI API, capture, prediction, SQLite
-├── frontend/         # React + Vite dashboard
-├── ml/               # Train / evaluate / test scripts
-├── dataset/          # CIC-IDS2017 CSV exports (not included)
-└── README.md
+├── backend/          FastAPI API, authentication, capture, prediction, SQLite
+├── frontend/         React and Vite security operations dashboard
+├── ml/               Training, evaluation, and saved-model utilities
+├── dataset/          CIC-IDS2017 sources and the small demo replay sample
+├── docs/images/      README artwork
+├── DEPLOYMENT.md     Vercel and Render deployment guide
+└── render.yaml       Render Blueprint configuration
 ```
 
 ## Prerequisites
 
-- Python 3.10+
-- Node.js 18+
-- (Optional) [Npcap](https://nmap.org/npcap/) on Windows for live packet capture with Scapy
+- Python 3.12
+- Node.js 18 or newer
+- Optional: [Npcap](https://nmap.org/npcap/) on Windows for live packet capture with Scapy
 
 ## Quick start
 
-### 1. Dataset (for training)
+### 1. Start the backend
 
-Download CIC-IDS2017 CSV files and place them in `dataset/`:
-
-- `Monday-WorkingHours.pcap_ISCX.csv`
-- `Friday-WorkingHours-Afternoon-DDos.pcap_ISCX.csv`
-
-### 2. Train the model
-
-```bash
-cd ml
-pip install pandas scikit-learn joblib numpy
-python train_model.py
-```
-
-Artifacts are saved to `backend/model/`:
-
-- `best_model.pkl` (deployment classifier)
-- `random_forest.pkl` (training copy)
-- `scaler.pkl`
-- `selected_features.pkl`
-
-SQLite database `backend/data/netshield.db` is created automatically on first API start.
-
-Without training, the API uses heuristic fallback predictions.
-
-### 3. Backend
-
-```bash
+```powershell
 cd backend
 python -m venv venv
-venv\Scripts\activate          # Windows
+.\venv\Scripts\Activate.ps1
 pip install -r requirements.txt
 uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
-Run from the `backend` directory so `app` imports resolve.
+The API and interactive documentation are available at:
 
-### 4. Frontend
+- API: `http://127.0.0.1:8000`
+- Swagger UI: `http://127.0.0.1:8000/docs`
 
-```bash
+### 2. Start the frontend
+
+```powershell
 cd frontend
 npm install
 npm run dev
 ```
 
-Open [http://localhost:5173](http://localhost:5173).
+Open `http://localhost:5173`.
 
-### 5. Demo monitoring
+### 3. Sign in locally
 
-1. Open **Live Monitor**
-2. Click **Start (simulate)** — generates synthetic benign and attack flows
-3. View alerts on **Alerts** and stats on **Dashboard**
+The initial accounts are created when the SQLite user table is empty:
 
-For live capture (requires admin + Npcap on Windows), use **Start (live / scapy)**.
+| Role | Email | Local default password |
+|---|---|---|
+| Administrator | `admin@netshield.local` | `Admin123!` |
+| Security Analyst | `analyst@netshield.local` | `Analyst123!` |
 
-## API endpoints
+Set `NETSHIELD_ADMIN_PASSWORD` and `NETSHIELD_ANALYST_PASSWORD` before the first backend start to replace these local defaults. Deployment passwords must be configured as private Render environment variables.
+
+## Detection workflow
+
+1. Capture or replay network traffic.
+2. Build bidirectional network-flow snapshots.
+3. Extract the 12 model features.
+4. Classify the flow as BENIGN or DDoS.
+5. Save predictions and generate security alerts.
+6. Review activity from the dashboard, logs, or manual prediction history.
+
+## Core API endpoints
 
 | Method | Path | Description |
-|--------|------|-------------|
-| GET | `/api/monitor/status` | Capture service status |
-| POST | `/api/monitor/start?simulate=true` | Start monitoring |
-| POST | `/api/monitor/stop` | Stop monitoring |
-| GET | `/api/monitor/live` | Recent classified flows |
-| GET | `/api/alerts` | List alerts |
-| GET | `/api/reports/dashboard` | Dashboard statistics |
-| GET | `/api/reports/flows` | Stored flow records |
-| GET | `/api/model/info` | ML model metadata |
+|---|---|---|
+| `POST` | `/api/auth/login` | Authenticate and create a server session |
+| `GET` | `/api/auth/me` | Validate the current session |
+| `POST` | `/api/auth/password` | Change the current account password |
+| `GET/POST` | `/api/users` | List or create platform users |
+| `PUT/DELETE` | `/api/users/{user_id}` | Update or remove a platform user |
+| `GET` | `/api/monitor/stats` | Dashboard detection statistics |
+| `GET` | `/api/monitor/live` | Recent classified network flows |
+| `GET` | `/api/alerts/` | Stored security alerts |
+| `POST` | `/api/predict/flow` | Run and save a manual flow prediction |
+| `GET` | `/api/predict/history` | Manual prediction history |
+| `POST` | `/api/replay/benign` | Replay BENIGN demo traffic |
+| `POST` | `/api/replay/ddos` | Replay DDoS demo traffic |
 
-## ML scripts
+## Model development
 
-```bash
-python ml/train_model.py      # Train on dataset CSVs
-python ml/evaluate_model.py   # Metrics on hold-out sample
-python ml/test_saved_model.py # Smoke test artifacts
+Place the required CIC-IDS2017 CSV exports in `dataset/`, then run:
+
+```powershell
+python ml\train_model.py
+python ml\evaluate_model.py
+python ml\test_saved_model.py
 ```
+
+Deployment artifacts are stored in `backend/model/`. The repository also includes a small `dataset/sample.csv` fixture for replay-only demonstrations.
 
 ## Demo deployment
 
-The repository includes Vercel and Render configuration for a safe replay-only cloud demo. Follow [DEPLOYMENT.md](DEPLOYMENT.md) for the exact deployment sequence and limitations.
+The repository is prepared for:
 
-## License
+- React/Vite on Vercel
+- FastAPI on Render
+- Replay-only demo traffic in cloud environments
 
-Educational / demonstration use. Ensure you have permission before capturing network traffic on any network.
+Follow [DEPLOYMENT.md](DEPLOYMENT.md) for the environment variables, deployment sequence, verification steps, and persistence limitations.
+
+## Responsible use
+
+NetShield IDS is an educational and demonstration project. Capture traffic only on networks where you have explicit permission. Do not upload private traffic, credentials, or sensitive datasets to a public demo.
+
+<sub>Header photo by <a href="https://unsplash.com/@fantasyflip">Philipp Katzenberger</a> on <a href="https://unsplash.com/photos/turned-on-black-and-grey-laptop-computer-iIJrUoeRoCQ">Unsplash</a>.</sub>

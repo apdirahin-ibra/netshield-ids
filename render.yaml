@@ -13,3 +13,7 @@ services:
         value: "true"
       - key: NETSHIELD_CAPTURE_ENABLED
         value: "false"
+      - key: NETSHIELD_ADMIN_PASSWORD
+        sync: false
+      - key: NETSHIELD_ANALYST_PASSWORD
+        sync: false

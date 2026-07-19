@@ -7,19 +7,41 @@ export const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
   const [session, setSession] = useState(() => authService.getSession());
+  const [authReady, setAuthReady] = useState(false);
   const navigate = useNavigate();
 
   const login = useCallback(async (email, password, remember) => {
     const next = await authService.login(email, password, remember);
     setSession(next);
+    setAuthReady(true);
     return next;
   }, []);
 
   const logout = useCallback(async () => {
     await authService.logout();
     setSession(null);
+    setAuthReady(true);
     navigate("/login", { replace: true });
   }, [navigate]);
+
+  const refreshSession = useCallback(async () => {
+    const validated = await authService.validateSession();
+    setSession(validated);
+    return validated;
+  }, []);
+
+  useEffect(() => {
+    let active = true;
+    authService.validateSession().then((validated) => {
+      if (active) {
+        setSession(validated);
+        setAuthReady(true);
+      }
+    });
+    return () => {
+      active = false;
+    };
+  }, []);
 
   useEffect(() => {
     const expired = () => logout();
@@ -38,11 +60,13 @@ export function AuthProvider({ children }) {
     accessToken: session?.access_token || null,
     sessionStartedAt: session?.created_at || null,
     isAuthenticated: Boolean(session?.access_token),
+    authReady,
     login,
     logout,
+    refreshSession,
     hasRole: (...roles) => roles.includes(session?.user?.role),
     hasPermission: (permission) => checkPermission(session?.user?.role, permission),
-  }), [session, login, logout]);
+  }), [session, authReady, login, logout, refreshSession]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
